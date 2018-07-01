@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.itany.netClass.dao.ChapterDao">
+	<sql id="chapterColumn">
+		id,
+		course_id,
+		title,
+		info,
+		create_date,
+		status
+	</sql>
+
+	<sql id="chapter2Column">
+		course_id,
+		title,
+		info,
+		create_date,
+		status
+	</sql>
+
+
+
+	<select id="selectAllById" resultType="chapter">
+		select
+		<include refid="chapterColumn"></include>
+		from t_chapter
+		where course_id=#{0}
+	</select>
+
+	<update id="updateStatus">
+		update t_chapter
+		set status = #{1}
+		where id = #{0}
+	</update>
+
+	<insert id="insertChapter">
+		insert into t_chapter
+		(
+		<include refid="chapter2Column"></include>
+		)
+		values
+		(#{0},#{1},#{2},#{3},#{4})
+	</insert>
+
+	<sql id="ResourceColumn">
+		title,
+		path,
+		original_name,
+		file_type,
+		create_date,
+		cost_type,
+		cost_number,
+		user_id,
+		chapter_id,
+		status
+	</sql>
+
+	<insert id="insertResource" parameterType="Resource">
+		insert into t_resource
+		(
+		<include refid="ResourceColumn"></include>
+		)
+		values
+		(#{title},#{path},#{originalName},#{fileType},#{createDate},#{costType},#{costNumber},#{userId},#{chapterId},#{status})
+	</insert>
+
+	<select id="selectByName" resultType="Integer">
+		select id
+		from t_chapter
+		where title=#{0}
+	</select>
+
+	<update id="updateNameById">
+		update t_chapter set
+		title = #{1}
+		where id=#{0}
+	</update>
+
+	<resultMap type="chapter" id="chapterMap">
+		<id property="id" column="id" />
+		<result property="course_id" column="course_id" />
+		<result property="title" column="title" />
+		<result property="info" column="info" />
+		<result property="create_date" column="createDateStr" />
+		<result property="status" column="status" />
+	</resultMap>
+
+	<select id="selectByFuzzy" parameterType="ChapterMessage" resultMap="chapterMap">
+		select id,course_id,title,info,
+		date_format(create_date, '%Y-%m-%d
+		%H:%i:%s') "createDateStr", status
+		from t_chapter
+		<trim prefix="where" prefixOverrides="and|or">
+			<if test="title != null and title != ''">
+				<bind name="title" value="'%'+ _parameter.title +'%'" />
+				and title like #{title} escape '/'
+			</if>
+			<if test="info != null and info != ''">
+				<bind name="info" value="'%'+ _parameter.info +'%'" />
+				and info like #{info} escape '/'
+			</if>
+			<if test="beginDate!=null &amp;&amp; beginDate!=''">
+				and create_date >= #{beginDate}
+			</if>
+			<if test="endDate!=null &amp;&amp; endDate!=''">
+				and #{endDate} >= create_date
+			</if>
+			<if test="status!=null &amp;&amp; status!='' &amp;&amp; status !=-1">
+			and status=#{status}
+		</if>
+		</trim>
+	</select>
+
+</mapper>

@@ -1,0 +1,192 @@
+package com.itany.netClass.controller;
+
+import java.io.FileInputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.itany.mvc.annotation.RequestMapping;
+import com.itany.mvc.annotation.ResponseBody;
+import com.itany.mvc.annotation.ResponseEntity;
+import com.itany.mvc.util.HttpHeaders;
+import com.itany.mvc.util.MediaType;
+import com.itany.netClass.constant.ResponseCodeConstant;
+import com.itany.netClass.dao.ChapterListDao;
+import com.itany.netClass.dao.PraiseDao;
+import com.itany.netClass.entity.Chapter;
+import com.itany.netClass.entity.Comment;
+import com.itany.netClass.entity.Praise;
+import com.itany.netClass.entity.Resource;
+import com.itany.netClass.entity.User;
+import com.itany.netClass.exception.TextIsEmptyException;
+import com.itany.netClass.exception.TextIsErrorException;
+import com.itany.netClass.factory.ObjectFactory;
+import com.itany.netClass.service.ChapterListService;
+import com.itany.netClass.service.ChapterService;
+import com.itany.netClass.service.CommentService;
+import com.itany.netClass.service.PraiseService;
+import com.itany.netClass.service.ResourceService;
+import com.itany.netClass.util.ParameterUtil;
+import com.itany.netClass.util.ResponseResult;
+
+@RequestMapping("/chapterList")
+public class ChapterListController {
+
+	ChapterListService chapterlistService = (ChapterListService) ObjectFactory
+			.getObject("chapterListService");
+	CommentService commentService = (CommentService) ObjectFactory
+			.getObject("commentService");
+
+	/**
+	 * 根据章节id查询章节详情，根据章节id查询评论详情
+	 * 
+	 * @param request
+	 * @param response
+	 * @return 资源集合，评论集合
+	 */
+	@RequestMapping("/findAll")
+	public String findByCourseId(HttpServletRequest request,
+			HttpServletResponse response) {
+		// String chapterId = request.getParameter("id");
+		String CourseId = "1";
+		List<Integer> list = new ArrayList<Integer>();
+		List<Chapter> chapters = chapterlistService
+				.findChaptersByCourseId(CourseId);
+		if (!chapters.isEmpty()) {
+			String courseName = chapters.get(0).getCourse().getCourse_name();
+			int click = chapters.get(0).getCourse().getClick_number();
+			String courseInfo = chapters.get(0).getCourse().getCourse_info();
+			for (int i = 0; i < chapters.size(); i++) {
+				list.add(chapters.get(i).getResource().getId());
+			}
+			List<Comment> comments = commentService
+					.findCommentsByCourseId(list);
+			Collections.reverse(comments);
+			request.getSession().setAttribute("comments", comments);
+			request.setAttribute("courseName", courseName);
+			request.setAttribute("courseInfo", courseInfo);
+			request.setAttribute("click", click);
+		}
+		request.setAttribute("chapters", chapters);
+		// request.setAttribute("id", id);
+
+		return "/frontcourse.do";
+
+	}
+
+	/**
+	 * 点赞功能 判断可以点赞后返回1; 不可以点赞返回空
+	 * 
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	@ResponseBody
+	@RequestMapping("/dianZan")
+	public String Update(HttpServletRequest request,
+			HttpServletResponse response) {
+		PraiseService praiseService = (PraiseService) ObjectFactory
+				.getObject("praiseService");
+		String commentId = request.getParameter("commentId");
+		String userId = request.getParameter("userId");
+		List<Praise> list = praiseService.selectByUserIdAndCommentId(
+				Integer.parseInt(userId), Integer.parseInt(commentId));
+		if (list.isEmpty()) {
+			praiseService.addByUserIdAndCommentId(Integer.parseInt(userId),
+					Integer.parseInt(commentId));
+			return "1";
+		}
+
+		return "";
+	}
+	
+	
+	/**
+	 * 判断是否是mp4文件，如果是则跳转到课程详情界面，若不是，则返回文件下载
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	@RequestMapping("/read")
+	public String read(HttpServletRequest request, HttpServletResponse response) {
+		ResourceService resourceService = (ResourceService) ObjectFactory.getObject("resourceService");
+		String resourceId = request.getParameter("rId");
+		//章节名
+		String title = request.getParameter("title");
+		String chapterId = request.getParameter("cid");
+		//资源名
+		String name = request.getParameter("name");
+		Resource r = resourceService.selectById(resourceId);
+		if(r!=null&&r.getFileType().equals("")){
+			//mp4格式跳转页面播放
+			if(r.getFileType()=="mp4"){
+				request.getSession().setAttribute("title", title);
+				request.getSession().setAttribute("chapterId", chapterId);
+				request.getSession().setAttribute("name", name);
+				request.getSession().setAttribute("resourceId", resourceId);
+				request.getSession().setAttribute("resourceUrl", r.getPath());
+				//加载评论
+				List<Comment> comments = commentService
+						.findCommentsByResourceId(resourceId);
+				Collections.reverse(comments);
+				request.getSession().setAttribute("comments", comments);
+				return "redirect:/frontcourseDetail.do";
+			}
+			//返回下载链接
+			request.getSession().setAttribute("resourceUrl", r.getPath());
+			request.getSession().setAttribute("resourceName", r.getTitle());
+			return "redirect:/down.do";
+		}
+		return "/chapterList/findAll.do";
+	}
+	/**
+	 * 文件下载跳转
+	 * @param request
+	 * @param response
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping("/down")
+	public ResponseEntity download(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		String name = (String) request.getSession().getAttribute("resourceName");
+		String path = request.getContextPath()+"/upload"+(String) request.getSession().getAttribute("resourceUrl");
+		FileInputStream fis = new FileInputStream(path);
+		byte[] data = new byte[fis.available()];
+		fis.read(data);
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+		headers.setContentDispositionFormData("attachment", name);
+		return new ResponseEntity(data, headers);
+	}
+	
+	@ResponseBody
+	@RequestMapping("/add")
+	public ResponseResult check(HttpServletRequest request, HttpServletResponse response){
+		
+		ResponseResult result = new ResponseResult();
+		String text = request.getParameter("text");
+		String resourceId = request.getParameter("resourceId");
+		User u = (User) request.getSession().getAttribute("user");
+		Integer Uid = u.getId();
+		//Integer Uid = 1;
+			try {
+				commentService.add(text,resourceId,Uid);
+				result.setResponseCode(ResponseCodeConstant.RESPONSE_CODE_SUCCESS);
+				result.setMessage("成功");
+			} catch (TextIsEmptyException e) {
+				result.setResponseCode(ResponseCodeConstant.RESPONSE_CODE_FAIL);
+				result.setMessage(e.getMessage());
+			} catch (TextIsErrorException e) {
+				result.setResponseCode(ResponseCodeConstant.RESPONSE_CODE_FAIL);
+				result.setMessage(e.getMessage());
+			} catch (Exception e) {
+				result.setResponseCode(ResponseCodeConstant.RESPONSE_CODE_FAIL);
+				result.setMessage(e.getMessage());
+			}
+		return result;
+	}
+	
+}

@@ -1,0 +1,81 @@
+package com.itany.netClass.service.impl;
+
+import java.util.Date;
+import java.util.List;
+
+import com.itany.netClass.dao.UserFontDao;
+import com.itany.netClass.entity.Course;
+import com.itany.netClass.entity.CourseType;
+import com.itany.netClass.entity.User;
+import com.itany.netClass.factory.ObjectFactory;
+import com.itany.netClass.service.UserFontService;
+
+public class UserFontServiceImpl   implements UserFontService{
+
+	@Override
+	public void register(User user) {
+		UserFontDao userFontDao= (UserFontDao) ObjectFactory.getObject("userFontDao");
+		userFontDao.registUser(user);
+	}
+
+	@Override
+	public User selectByUsername(String username) {
+		UserFontDao userFontDao= (UserFontDao) ObjectFactory.getObject("userFontDao");
+		User user=userFontDao.selectByUsername(username);
+		return user;
+	}
+
+	@Override
+	public User login(String username, String password) {
+		UserFontDao userFontDao= (UserFontDao) ObjectFactory.getObject("userFontDao");
+		User user=userFontDao.login(username, password);
+		return user;
+	}
+
+	@Override
+	public User selectByUsernameandPwd(String username, String password) {
+		UserFontDao userFontDao= (UserFontDao) ObjectFactory.getObject("userFontDao");
+		User user=userFontDao.selectByUsernameAndPwd(username, password);
+		return user;
+	}
+
+	@Override
+	public void modifyUserMsg(String username, String password,
+			String nickname, String email) {
+		UserFontDao userFontDao= (UserFontDao) ObjectFactory.getObject("userFontDao");
+		userFontDao.modifyUserMsg(username, password, nickname, email);
+	}
+
+	@Override
+	public void qiandao(String userId, Date functiondate) {
+		UserFontDao userFontDao= (UserFontDao) ObjectFactory.getObject("userFontDao");
+		userFontDao.qiandao(userId,functiondate);
+	}
+
+	@Override
+	public void insertLoginDate(Integer userid, String date) {
+		UserFontDao userFontDao= (UserFontDao) ObjectFactory.getObject("userFontDao");
+		userFontDao.insertLoginDate(userid, date);
+	}
+
+	@Override
+	public List<CourseType> selectTypes() {
+		UserFontDao userFontDao= (UserFontDao) ObjectFactory.getObject("userFontDao");
+		List<CourseType> courseTypes= userFontDao.selectTypes();
+		return courseTypes;
+	}
+
+	@Override
+	public List<Course> findFourCourse() {
+		UserFontDao userFontDao= (UserFontDao) ObjectFactory.getObject("userFontDao");
+		List<Course> courses= userFontDao.findFourCourse();
+		return courses;
+	}
+
+	@Override
+	public List<Course> selectCourseByClickNumber() {
+		UserFontDao userFontDao= (UserFontDao) ObjectFactory.getObject("userFontDao");
+		List<Course> courses= userFontDao.selectCourseByClickNumber();
+		return courses;
+	}
+}

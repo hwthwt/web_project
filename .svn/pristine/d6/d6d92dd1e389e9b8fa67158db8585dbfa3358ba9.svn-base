@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.itany.netClass.dao.PraiseDao">
+	<sql id="praiseColumn">
+		id,
+		user_id,
+		comment_id,
+		create_date
+	</sql>
+
+	
+
+
+	<select id="selectByUserIdAndCommentId" resultType="Praise">
+		select
+		<include refid="praiseColumn"></include>
+		from t_praise 
+		where user_id = #{0}
+		and comment_id = #{1}
+	</select>
+	
+	<insert id="addByUserIdAndCommentId">
+		insert
+		into
+		t_praise
+		(user_id,
+		comment_id,
+		create_date)
+		values
+		(#{0},#{1},date_format(now(), '%Y-%m-%d %H:%i:%s'))
+	</insert>
+</mapper>

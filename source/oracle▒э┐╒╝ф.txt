@@ -1,0 +1,15 @@
+﻿/*第1步：创建数据表空间  */
+create tablespace tth_data 
+logging 
+datafile 'D:\oracledata\tth_data.dbf' 
+size 50m 
+autoextend on 
+next 50m maxsize 20480m 
+extent management local;
+
+/*第2步：创建用户并指定表空间  */
+create user tth identified by tth
+default tablespace tth_data;
+
+/*第3步：给用户授予权限  */
+grant connect,resource,dba to tth;

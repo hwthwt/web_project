@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.itany.netClass.dao.ResourceDao">
+		<update id="updateResource" parameterType="resource">
+				update t_resource set
+				title=#{title},
+				path=#{path},
+				original_name=#{originalName},  
+				file_type=#{fileType},
+				create_date=#{createDate}, 
+				cost_type=#{costType}, 
+				cost_number=#{costNumber} 
+				where  chapter_id=#{chapterId}
+		</update>
+		<resultMap type="resource" id="resourceMap">
+		<id property="id" column="id" />
+		<result property="title" column="title" />
+		<result property="path" column="path" />
+		<result property="coverImageUrl" column="cover_image_url" />
+		<result property="originalName" column="original_name" />
+		<result property="fileSize" column="file_size" />
+		<result property="fileType" column="file_type" />
+		<result property="clickCount" column="click_count" />
+		<result property="createDateD" column="create_date" />
+		<result property="createDate" column="createdate" />
+		<result property="costType" column="cost_type" />
+		<result property="costNumber" column="cost_number" />
+		<result property="status" column="status" />
+		<association property="user" column="user_id" javaType="user">
+			<id property="id" column="u.id" />
+			<result property="nickname" column="nickname" />
+		</association>
+		<!-- <association property="chapter" column="chapter_id" javaType="chapter"> 
+			<id property="id" column="t.id" /> <result property="typeName" column="type_name" 
+			/> <result property="parentId" column="parent_id" /> <result property="status" 
+			column="t.status" /> </association> -->
+	</resultMap>
+
+	<select id="selectAll2" resultMap="resourceMap">
+		select
+		r.id,r.title,r.path,r.cover_image_url,r.original_name,r.file_size,r.file_type,r.click_count,r.create_date,r.cost_type,r.cost_number,r.status,
+		date_format(r.create_date, '%Y-%m-%d
+		%H:%i:%s') 'createdate',
+		u.id
+		'u.id',u.nickname
+		from t_resource r
+		left join t_user u
+		on r.user_id = u.id
+	</select>
+	
+	<select id="selectById" resultMap="resourceMap">
+		select
+		r.id,r.title,r.path,r.cover_image_url,r.original_name,r.file_size,r.file_type,r.click_count,r.create_date,r.cost_type,r.cost_number,r.status,
+		date_format(r.create_date, '%Y-%m-%d
+		%H:%i:%s') 'createdate',
+		u.id
+		'u.id',u.nickname
+		from t_resource r
+		left join t_user u
+		on r.user_id = u.id
+		where r.id = #{id}
+	</select>
+	
+	
+	<update id="updateStatus">
+		update t_resource 
+		set 
+		status = #{0}
+		where id = #{1}
+	</update>
+	<!-- <select id="selectAll" resultMap="commentMapper">
+		select
+		c.id,
+		c.context,
+		c.create_date,
+		c.user_id,
+		c.resource_id,
+		c.status,
+		from t_comment c
+		inner
+		join t_resource r
+		on c.resource_id = t.id
+		inner join t_user u
+		on
+		c.user_id
+	</select> -->
+	
+	<select id="selectSearch" parameterType="resource" resultMap="resourceMap">
+		select
+		r.id,r.title,r.path,r.cover_image_url,r.original_name,r.file_size,r.file_type,r.click_count,r.create_date,r.cost_type,r.cost_number,r.status,
+		date_format(r.create_date, '%Y-%m-%d
+		%H:%i:%s') 'createdate',
+		u.id
+		'u.id',u.nickname
+		from t_resource r
+		left join t_user u
+		on r.user_id = u.id
+		<trim prefix="where" prefixOverrides="AND|OR">
+			<if test="title!=null &amp;&amp; title!=''">
+				<bind name="title" value="'%'+ _parameter.title +'%'" />
+				and r.title like #{title} escape '/'
+			</if>
+			<if test="nickname!=null &amp;&amp; nickname!=''">
+				<bind name="nickname" value="'%'+ _parameter.nickname +'%'" />
+				and u.nickname like #{nickname} escape '/'
+			</if>
+			<if test="status!=null">
+				and r.status = #{status} 
+			</if>
+
+			<if test="fileType!=null &amp;&amp; fileType!=''">
+				and r.file_type = #{fileType} 
+			</if>
+			<if test="beginTime!=null &amp;&amp; beginTime!=''"> 
+			and r.create_date >= #{beginTime} 
+			</if>
+			<if test="endTime!=null &amp;&amp; endTime!=''">
+				and #{endTime} >= r.create_date
+			 </if>
+		</trim>
+	</select>
+	
+	
+		
+		
+		
+		
+</mapper>

@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.itany.netClass.dao.UserDao">
+
+	<sql id="userColumn">
+		id,
+		login_name "username",
+		nickname,
+		password,
+		role,
+		email,
+		login_date "loginDate",
+		create_date "createDate",
+		status
+	</sql>
+	<select id="selectByUsername" parameterType="string" resultType="User">
+		select
+		<include refid="userColumn"></include>
+		from t_user
+		where login_name=#{username}
+	</select>
+
+	<select id="selectByUserNickname" resultType="User">
+		select
+		<include refid="userColumn"></include>
+		from t_user
+		where nickname=#{1}
+		and id !=#{0}
+	</select>
+
+	<insert id="insertMysql" parameterType="User" useGeneratedKeys="true"
+		keyProperty="id">
+		insert into t_user
+		(login_name,nickname,password,role,email,login_date,create_date,status)
+		values
+		(#{username},#{nickname},#{password},#{role},#{email},#{loginDate},#{createDate},#{flag})
+	</insert>
+
+	<update id="updateStatus">
+		update t_user
+		set status = #{1}
+		where id =#{0}
+	</update>
+
+	<insert id="insertOracle" parameterType="User">
+		<selectKey keyProperty="id" order="AFTER" resultType="integer">
+			select
+			user_seq.currval from dual
+		</selectKey>
+		insert into t_user
+		(id,login_name,nickname,password,role,email,login_date,create_date,status)
+		values
+		(user_seq.nextval,#{username},#{nickname},#{password},#{role},#{email},#{loginDate,jdbcType=DATE},#{createDate},#{flag})
+	</insert>
+
+	<insert id="insertOracle2" parameterType="User">
+		<selectKey keyProperty="id" order="BEFORE" resultType="integer">
+			select user_seq.nextval from dual
+		</selectKey>
+		insert into t_user
+		(id,login_name,nickname,password,role,email,login_date,create_date,status)
+		values
+		(#{id},#{username},#{nickname},#{password},#{role},#{email},#{loginDate,jdbcType=DATE},#{createDate},#{flag})
+	</insert>
+
+	<select id="selectByUsernameAndPassword" resultType="User">
+		select
+		<include refid="userColumn"></include>
+		from t_user
+		where login_name=#{username}
+		and password=#{password}
+	</select>
+
+	<resultMap type="User" id="userMap"> 
+		<id property="id" column="id" />
+		<result property="username" column="username" />
+		<result property="nickname" column="nickname" />
+		<result property="password" column="password" />
+		<result property="role" column="role" />
+		<result property="email" column="email" />
+		<result property="loginDate" column="logindate" />
+		<result property="createDate" column="createdate" />
+		<result property="loginDateStr" column="loginDateStr" />
+		<result property="createDateStr" column="createDateStr" />
+		<result property="flag" column="status" />
+	</resultMap>
+	<!-- date_format(now(), '%Y-%m-%d %H:%i:%s') mysql -->
+	<!-- to_char(sysdate, 'yyyy-MM-dd hh24:mm:ss') oracle -->
+	<select id="selectAll" parameterType="User" resultMap="userMap">
+		select
+		id, login_name "username", nickname, password, role, email,
+		login_date
+		"loginDate", create_date "createDate", status,
+		date_format(login_date, '%Y-%m-%d %H:%i:%s') "loginDateStr",
+		date_format(create_date,
+		'%Y-%m-%d %H:%i:%s') "createDateStr"
+		from
+		t_user
+		<where>
+			<if test="id != null">and id &lt; #{id}</if>
+			<if test="createDate != null">and createDate &lt; #{createDate}
+			</if>
+		</where>
+		order by id desc
+	</select>
+
+
+	<select id="selectAllUser" resultMap="userMap">
+		select
+		id, login_name
+		"username", nickname, password, role, email, login_date
+		"loginDate",
+		create_date "createDate", status,
+		date_format(login_date, '%Y-%m-%d
+		%H:%i:%s') "loginDateStr", date_format(create_date,
+		'%Y-%m-%d
+		%H:%i:%s') "createDateStr"
+		from t_user
+	</select>
+
+
+	<select id="selectByUserId" parameterType="int" resultMap="userMap">
+		select
+		id, login_name "username", nickname, password, role, email,
+		login_date
+		"loginDate", create_date "createDate", status,
+		date_format(login_date, '%Y-%m-%d %H:%i:%s') "loginDateStr",
+		date_format(create_date,
+		'%Y-%m-%d %H:%i:%s') "createDateStr"
+		from
+		t_user
+		where id = #{id}
+	</select>
+
+
+
+	<select id="selectByFuzzy" parameterType="User" resultType="User">
+		select
+		<include refid="userColumn"></include>
+		from t_user
+		<trim prefix="where" prefixOverrides="AND|OR">
+			<if test="username!=null &amp;&amp; username!=''">
+				and login_name
+				like concat('%',concat(#{name},'%'))
+			</if>
+			<if test="role!=null and role!=''">
+				and role like
+				concat('%',concat(#{role},'%'))
+			</if>
+			<if test="nickname!=null and nickname!=''">
+				and nickname like
+				concat('%',concat(#{nickname},'%'))
+			</if>
+			<if test="email!=null and email!=''">
+				and email like
+				concat('%',concat(#{email},'%'))
+			</if>
+			<if test="flag!=null">
+				and status = #{flag}
+			</if>
+			<if test="id!=null">
+				and id = #{id}
+			</if>
+		</trim>
+	</select>
+
+	<resultMap type="CourseType" id="courseTypeMap">
+		<id property="id" column="p1Id" />
+		<result property="typeName" column="p1Name" />
+		<result property="parentId" column="p1ParentId" />
+		<result property="status" column="p1Status" />
+		<collection property="children" javaType="CourseType"
+			column="p1ParentId">
+			<id property="id" column="p2Id" />
+			<result property="typeName" column="p2Name" />
+			<result property="parentId" column="p2ParentId" />
+			<result property="status" column="p2Status" />
+			<collection property="children" javaType="CourseType"
+				column="p2ParentId">
+				<id property="id" column="p3Id" />
+				<result property="typeName" column="p3Name" />
+				<result property="parentId" column="p3ParentId" />
+				<result property="status" column="p3Status" />
+			</collection>
+		</collection>
+	</resultMap>
+
+	<select id="selectTypes" resultMap="courseTypeMap">
+		select
+		p1.id p1Id,p1.type_name
+		p1Name,p1.status p1Status,p1.parent_id p1ParentId,
+		p2.id
+		p2Id,p2.type_name p2Name,p2.status p2Status,p2.parent_id
+		p2ParentId,
+		p3.id p3Id,p3.type_name p3Name,p3.status p3Status,p3.parent_id
+		p3ParentId
+		from t_course_type p1
+		left join t_course_type p2 on
+		p2.parent_id =
+		p1.id
+		left join t_course_type p3 on p3.parent_id = p2.id
+		where
+		p1.parent_id is null
+	</select>
+	<select id="selectUserByName" parameterType="string" resultMap="userMap">
+		select
+		id, login_name "username", nickname, password, role, email,
+		login_date
+		"loginDate", create_date "createDate", status,
+		date_format(login_date, '%Y-%m-%d %H:%i:%s') "loginDateStr",
+		date_format(create_date,
+		'%Y-%m-%d %H:%i:%s') "createDateStr"
+		from
+		t_user
+		where login_name = #{username}
+	</select>
+	<update id="updateUser">
+		update t_user
+		set nickname=#{1},
+		role=#{2},
+		password=#{3},
+		email=#{4}
+		where id = #{0}
+	</update>
+
+	<select id="selectSearch" parameterType="UserMessage" resultMap="userMap">
+		select
+		id, login_name "username", nickname, password, role, email,
+		login_date
+		"loginDate", create_date "createDate", status,
+		date_format(login_date, '%Y-%m-%d %H:%i:%s') "loginDateStr",
+		date_format(create_date,
+		'%Y-%m-%d %H:%i:%s') "createDateStr"
+		from
+		t_user
+		<trim prefix="where" prefixOverrides="AND|OR">
+			<if test="username!=null &amp;&amp; username!=''">
+				<bind name="username" value="'%'+ _parameter.username +'%'" />
+				and login_name like #{username} escape '/'
+			</if>
+			<if test="nickname!=null &amp;&amp; nickname!=''">
+				<bind name="nickname" value="'%'+ _parameter.nickname +'%'" />
+				and nickname like #{nickname} escape '/'
+			</if>
+			<if test="email!=null &amp;&amp; email!=''">
+				<bind name="email" value="'%'+ _parameter.email +'%'" />
+				and email like #{email} escape '/'
+			</if>
+
+			<if test="role!=null &amp;&amp; role!=''">
+				and role = #{role}
+			</if>
+
+			<if test="createBegin!=null &amp;&amp; createBegin!=''"> 
+			and create_date >= #{createBegin} 
+			</if>
+			<if test="createEnd!=null &amp;&amp; createEnd!=''">
+				and #{createEnd} >= create_date
+			 </if>
+			<if test="loginBegin!=null &amp;&amp; loginBegin!=''"> 
+				and login_date >= #{loginBegin} 
+		 </if>
+			<if test="loginEnd!=null &amp;&amp; loginEnd!=''"> 
+				and  #{loginEnd} >=login_date
+			</if>
+		</trim>
+	</select>
+
+
+
+</mapper>

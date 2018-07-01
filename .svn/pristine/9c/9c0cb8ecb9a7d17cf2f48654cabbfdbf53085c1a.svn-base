@@ -1,0 +1,261 @@
+package com.itany.netClass.controller;
+
+import java.io.File;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import com.itany.mvc.annotation.RequestMapping;
+import com.itany.mvc.annotation.ResponseBody;
+import com.itany.netClass.constant.Constant;
+import com.itany.netClass.entity.Course;
+import com.itany.netClass.entity.CourseType;
+import com.itany.netClass.entity.Record;
+import com.itany.netClass.entity.User;
+import com.itany.netClass.factory.ObjectFactory;
+import com.itany.netClass.service.RecordService;
+import com.itany.netClass.service.UserFontService;
+import com.itany.netClass.service.UserService;
+import com.itany.netClass.util.AjaxResult;
+import com.itany.netClass.util.CommonUtil;
+
+@RequestMapping("/userfont")
+public class UserFontController {
+
+	@RequestMapping("/regist")
+	public String regist(HttpServletRequest request,
+			HttpServletResponse response) throws ParseException {
+		UserFontService userFontService = (UserFontService) ObjectFactory
+				.getObject("userFontService");
+		String username = request.getParameter("username");
+		String nickname = request.getParameter("nickname");
+		String password = request.getParameter("password");
+		// String role = request.getParameter("role");
+		String email = request.getParameter("email");
+
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		String time = sdf.format(new Date());
+		Date nowdate = sdf.parse(time);
+
+		User user = new User(null, username, nickname,
+				CommonUtil.md5(password), "用户", email, null, nowdate, 0);
+		System.out.println(user);
+		try {
+			userFontService.register(user);
+			request.setAttribute("msg", "注册成功");
+		} catch (Exception e) {
+			e.printStackTrace();
+			request.setAttribute("msg", e.getMessage());
+		}
+		return "redirect:/userfont/findtypes.do";
+	}
+
+	@ResponseBody
+	@RequestMapping("/selectByName")
+	public AjaxResult selectByName(HttpServletRequest request,
+			HttpServletResponse response) {
+		UserFontService userFontService = (UserFontService) ObjectFactory
+				.getObject("userFontService");
+
+		String username = request.getParameter("name");
+
+		AjaxResult ajaxResult = new AjaxResult();
+
+		try {
+			User user = userFontService.selectByUsername(username);
+			ajaxResult.setSuccess(Constant.RESPONSE_SUCCESS);
+			ajaxResult.setMsg("成功");
+			ajaxResult.setObj(user);
+		} catch (Exception e) {
+			ajaxResult.setSuccess(Constant.RESPONSE_FAIL);
+			ajaxResult.setMsg("服务器内部异常");
+			e.printStackTrace();
+		}
+
+		return ajaxResult;
+	}
+
+	@RequestMapping("/login")
+	public String login(HttpServletRequest request, HttpServletResponse response) {
+		System.out.println("可以登录啦");
+		UserFontService userFontService = (UserFontService) ObjectFactory
+				.getObject("userFontService");
+
+		String username = request.getParameter("username");
+		String password = request.getParameter("password");
+
+		User user = userFontService.login(username, CommonUtil.md5(password));
+		if (user == null) {
+			request.getSession().setAttribute("LoginMsg", "用户名或者密码错误,请重新登录");
+			return "redirect:/index.do";
+		}
+
+		Date qiandaoDate=user.getLoginDate();
+		Integer isQiandao=0;
+		if(qiandaoDate!=null){
+			String diandateDatestr=new SimpleDateFormat("yyyyMMdd").format(qiandaoDate);
+			String nowdateStr=new SimpleDateFormat("yyyyMMdd").format(new Date());
+			if(diandateDatestr.equals(nowdateStr)){
+				isQiandao=1;
+			}
+		System.out.println("=================签到的日期为:++++=================" + diandateDatestr);
+		user.setFlag(isQiandao);
+		}
+		
+		RecordService recordService = (RecordService) ObjectFactory
+				.getObject("recordService");
+		List<Record> list = recordService.findByUserId(user);
+		int point = 0;
+		int gold = 0;
+		for (int i = 0; i < list.size(); i++) {
+			point += list.get(i).getPointCount();
+			gold += list.get(i).getGoldCount();
+		}
+		user.setAllGold(gold);
+		user.setAllPoint(point);
+		request.getSession().setAttribute("LoginMsg", "登录成功");
+		request.getSession().setAttribute("user", user);
+	
+		return "redirect:/userfont/findtypes.do";
+	}
+
+	@RequestMapping("/loginOut")
+	public String loginOut(HttpServletRequest request,
+			HttpServletResponse response) {
+		HttpSession session = request.getSession();
+		User user = (User) session.getAttribute("user");
+		if (null != user) {
+			session.removeAttribute("user");
+		}
+		session.invalidate();// 使session无效
+		return "redirect:/userfont/findtypes.do";// (相对路径重定向)
+	}
+
+	@ResponseBody
+	@RequestMapping("/checkOldPassword")
+	public AjaxResult checkOldPassword(HttpServletRequest request,
+			HttpServletResponse response) {
+		UserFontService userFontService = (UserFontService) ObjectFactory
+				.getObject("userFontService");
+		String username = request.getParameter("username");
+		String password = request.getParameter("password");
+		password = CommonUtil.md5(password);
+
+		AjaxResult ajaxResult = new AjaxResult();
+
+		try {
+			User user = userFontService.selectByUsernameandPwd(username,
+					password);
+			ajaxResult.setSuccess(Constant.RESPONSE_SUCCESS);
+			ajaxResult.setMsg("旧密码正确");
+			ajaxResult.setObj(user);
+		} catch (Exception e) {
+			ajaxResult.setSuccess(Constant.RESPONSE_FAIL);
+			ajaxResult.setMsg("服务器内部异常");
+			e.printStackTrace();
+		}
+		return ajaxResult;
+	}
+
+	@RequestMapping("/modifyUser")
+	public String modifyUser(HttpServletRequest request,
+			HttpServletResponse response) {
+		UserFontService userFontService = (UserFontService) ObjectFactory
+				.getObject("userFontService");
+		String username = request.getParameter("username");
+		String newPassword = request.getParameter("newPassword");
+		String nickname = request.getParameter("nickname");
+		String email = request.getParameter("email");
+
+		userFontService.modifyUserMsg(username, CommonUtil.md5(newPassword),
+				nickname, email);
+		request.getSession().setAttribute("ModifyMsg", "用户信息修改成功");
+		return "redirect:/userfont/findtypes.do";// (相对路径重定向)
+	}
+
+	@ResponseBody
+	@RequestMapping("/qiandao")
+	public AjaxResult qiandao(HttpServletRequest request,
+			HttpServletResponse response) throws ParseException {
+		UserFontService userFontService = (UserFontService) ObjectFactory
+				.getObject("userFontService");
+		String useriD = request.getParameter("useriD");
+		System.out.println("签到用户的id为:" + useriD);
+		User user = (User) request.getSession().getAttribute("user");
+		AjaxResult ajaxResult = new AjaxResult();
+
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		String time = sdf.format(new Date());
+		Date nowdate = sdf.parse(time);
+
+		// 把签到的年月日插入到user的数据库中
+		String datestr = new SimpleDateFormat("yyyyMMdd").format(new Date());
+		userFontService.insertLoginDate(Integer.parseInt(useriD), datestr);
+
+		try {
+			userFontService.qiandao(useriD, nowdate);
+			ajaxResult.setSuccess(Constant.RESPONSE_SUCCESS);
+			ajaxResult.setMsg("签到成功");
+		} catch (Exception e) {
+			ajaxResult.setSuccess(Constant.RESPONSE_FAIL);
+			ajaxResult.setMsg("服务器内部异常");
+			e.printStackTrace();
+		}
+		return ajaxResult;
+	}
+
+	@RequestMapping("/findtypes")
+	public String loadFirstChild(HttpServletRequest request,
+			HttpServletResponse response) {
+		UserFontService userFontService = (UserFontService) ObjectFactory
+				.getObject("userFontService");
+		// 查找导航菜单的内容
+		List<CourseType> courseTypes = userFontService.selectTypes();
+		// 查找实战推荐里面的课程内容
+		List<Course> courses = userFontService.selectCourseByClickNumber();
+		System.out.println("courses内的值为:" + courses);
+		for (int i = 0; i < courses.size(); i++) {
+			System.out.println(i);
+			System.out.println(courses.get(i));
+		}
+
+		// System.out.println("courseTypes内的值为:"+courseTypes);
+		// for(int i=0;i<courseTypes.size();i++){
+		// System.out.println(i);
+		// System.out.println(courseTypes.get(i));
+		// }
+		request.getSession().setAttribute("courseTypes", courseTypes);
+		request.getSession().setAttribute("allcourses", courses);
+		return "redirect:/index.do";
+	}
+
+	@ResponseBody
+	@RequestMapping("/findFourCourse")
+	public AjaxResult findFourCourse(HttpServletRequest request,
+			HttpServletResponse response) {
+		UserFontService userFontService = (UserFontService) ObjectFactory
+				.getObject("userFontService");
+		String id = request.getParameter("id");
+		System.out.println("id为===========" + id);
+		AjaxResult ajaxResult = new AjaxResult();
+
+		try {
+			List<Course> courses = userFontService.findFourCourse();
+			ajaxResult.setSuccess(Constant.RESPONSE_SUCCESS);
+			ajaxResult.setMsg("找出来了");
+			ajaxResult.setObj(courses);
+		} catch (Exception e) {
+			ajaxResult.setSuccess(Constant.RESPONSE_FAIL);
+			ajaxResult.setMsg("服务器内部异常");
+			e.printStackTrace();
+		}
+		return ajaxResult;
+	}
+
+}

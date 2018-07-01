@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.itany.netClass.dao.CourseSetDao">
+	<sql id="courseSetColumn">
+		id ,
+		course_name ,
+		course_info ,
+		author ,
+		cover_image_url ,
+		create_date ,
+		click_number ,
+		status ,
+		recommendation_grade ,
+		course_type_id
+	</sql>
+	
+	<resultMap type="courseSet" id="CourseSetMapper">
+		<id property="id" column="id"/>
+		<result property="course_name" column="course_name"/>
+		<result property="course_info" column="course_info"/>
+		<result property="author" column="author"/>
+		<result property="cover_image_url" column="cover_image_url"/>
+		<result property="create_date" column="create_date"/>
+		<result property="click_number" column="click_number"/>
+		<result property="status" column="status"/>
+		<result property="recommendation_grade" column="recommendation_grade"/>
+		<association property="courseType" column="course_type_id"
+			javaType="courseType">
+			<id property="id" column="t.id"/>
+			<result property="typeName" column="type_name"/>
+			<result property="parentId" column="parent_id"/>
+			<result property="status" column="t.status"/>
+		</association>
+		
+	</resultMap>
+
+
+	<select id="selectAll" resultMap="CourseSetMapper">
+		select
+		c.id ,c.course_name
+		,c.course_info ,c.author ,c.cover_image_url
+		,c.create_date ,c.click_number
+		,c.status ,c.recommendation_grade
+		,c.course_type_id,
+		t.id 't.id' ,t.type_name ,t.parent_id,t.status
+		't.status'
+		from t_course c
+		inner join t_course_type t
+		on c.course_type_id = t.id
+	</select>
+
+	<update id="updateStatusById" >
+		update
+		t_course
+		set status = #{1}
+		where id = #{0}
+	</update>
+	
+	<select id="selectByNameAndAuthor" resultMap="CourseSetMapper">
+		select
+		c.id ,c.course_name
+		,c.course_info ,c.author ,c.cover_image_url
+		 ,c.click_number
+		,c.status ,c.recommendation_grade
+		,c.course_type_id,
+		t.id 't.id' ,t.type_name ,t.parent_id,t.status
+		't.status'
+		from t_course c
+		inner join t_course_type t
+		on c.course_type_id = t.id
+		where c.course_name = #{0}
+		and c.author = #{1}
+	</select>
+	<select id="selectByIdAndAuthor" resultMap="CourseSetMapper">
+		select
+		c.id ,c.course_name
+		,c.course_info ,c.author ,c.cover_image_url
+		 ,c.click_number
+		,c.status ,c.recommendation_grade
+		,c.course_type_id,
+		t.id 't.id' ,t.type_name ,t.parent_id,t.status
+		't.status'
+		from t_course c
+		inner join t_course_type t
+		on c.course_type_id = t.id
+		where c.id = #{0}
+		and c.author = #{1}
+	</select>
+	<select id="selectByName" resultMap="CourseSetMapper">
+		select
+		c.id ,c.course_name
+		,c.course_info ,c.author ,c.cover_image_url
+		,c.click_number
+		,c.status ,c.recommendation_grade
+		,c.course_type_id,
+		t.id 't.id' ,t.type_name ,t.parent_id,t.status
+		't.status'
+		from t_course c
+		inner join t_course_type t
+		on c.course_type_id = t.id
+		where c.course_name = #{0}
+	</select>
+	<insert id="insert">
+		insert
+		into t_course
+		(course_name ,
+		course_info ,
+		author ,
+		cover_image_url ,
+		create_date ,
+		click_number ,
+		status ,
+		recommendation_grade ,
+		course_type_id)
+		values
+		(#{0},#{1},#{2},#{3},date_format(now(), '%Y-%m-%d %H:%i:%s'),0,0,#{4},#{5})
+	</insert>
+	<select id="selectById" resultMap="CourseSetMapper">
+		select
+		c.id ,c.course_name
+		,c.course_info ,c.author ,c.cover_image_url
+		,c.click_number
+		,c.status ,c.recommendation_grade
+		,c.course_type_id,
+		t.id 't.id' ,t.type_name ,t.parent_id,t.status
+		't.status'
+		from t_course c
+		inner join t_course_type t
+		on c.course_type_id = t.id
+		where c.id = #{0}
+	</select>
+	<update id="update">
+		update 
+		t_course
+		set course_name = #{1},
+		course_info = #{2},
+		author = #{3},
+		cover_image_url = #{6},
+		recommendation_grade = #{4},
+		course_type_id = #{5}
+		where id = #{0}
+	</update>
+</mapper>

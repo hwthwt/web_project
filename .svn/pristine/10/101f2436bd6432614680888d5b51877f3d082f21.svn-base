@@ -1,0 +1,42 @@
+package com.itany.netClass.service.proxy;
+
+import java.util.List;
+
+import com.itany.netClass.entity.Comment;
+import com.itany.netClass.factory.ObjectFactory;
+import com.itany.netClass.service.CommentService;
+import com.itany.netClass.service.CommentSetService;
+import com.itany.netClass.transaction.TransactionManager;
+
+public class CommentSetServiceProxy implements CommentSetService {
+	
+	private TransactionManager tran = (TransactionManager) ObjectFactory
+			.getObject("transaction");
+	private CommentSetService commentSetService = (CommentSetService) ObjectFactory
+			.getObject("commentSetServiceTarget");
+
+
+	@Override
+	public List<Comment> findAll(String reId) {
+		tran.beginTransaction();
+		List<Comment> list = commentSetService.findAll(reId);
+		tran.commit();
+		return list;
+	}
+
+
+	@Override
+	public void update(String id, String status) {
+		tran.beginTransaction();
+		try {
+			commentSetService.update(id, status);
+			tran.commit();
+		} catch (Exception e) {
+			tran.rollback();
+			e.printStackTrace();
+		}
+	}
+
+
+
+}

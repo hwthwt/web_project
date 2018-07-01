@@ -1,0 +1,29 @@
+
+
+自定义文件下载时,响应头部信息的设置
+response.setContentType("text/plain");
+response.setHeader("Location", "文件名称.后缀");
+response.setHeader("Content-Disposition", "attachment; filename=" + "文件名称.后缀");
+
+//oracle
+CREATE TABLE "T_USER" (	
+"ID" NUMBER PRIMARY KEY, 
+"USERNAME" VARCHAR2(40), 
+"NICKNAME" VARCHAR2(60), 
+"PASSWORD" VARCHAR2(20), 
+"ROLE" VARCHAR2(40), 
+"EMAIL" VARCHAR2(40), 
+"CREATE_DATE" DATE, 
+"FLAG" NUMBER(1,0) NOT NULL ENABLE, 
+"LOGIN_DATE" DATE, 
+)
+
+CREATE SEQUENCE "USER_SEQ";
+insert into t_user (id,username,nickname,password,role,email,create_date,flag) values(USER_SEQ.nextval,'aa','aa','a','normal','aa@itany.com',sysdate,'0');
+//mysql
+insert into t_user (login_name,nickname,password,role,email,create_date,status) values('aa','aa','a','normal','aa@itany.com',now(),'0');
+insert into t_user (login_name,nickname,password,role,email,create_date,status) values('bb','bb','b','normal','bb@itany.com',now(),'0');
+insert into t_user (login_name,nickname,password,role,email,create_date,status) values('cc','cc','c','normal','cc@itany.com',now(),'0');
+insert into t_user (login_name,nickname,password,role,email,create_date,status) values('dd','dd','d','normal','dd@itany.com',now(),'0');
+insert into t_user (login_name,nickname,password,role,email,create_date,status) values('ee','ee','e','normal','ee@itany.com',now(),'0');
+insert into t_user (login_name,nickname,password,role,email,create_date,status) values('ff','ff','f','normal','ff@itany.com',now(),'0');

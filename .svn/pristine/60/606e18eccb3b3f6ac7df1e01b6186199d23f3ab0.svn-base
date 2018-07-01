@@ -1,0 +1,11 @@
+package com.itany.netClass.dao;
+
+import java.util.List;
+
+import com.itany.netClass.entity.Chapter;
+
+public interface ChapterListDao {
+
+	List<Chapter> selectAllByCourseId(int id);
+
+}

@@ -1,0 +1,71 @@
+package com.itany.netClass.controller;
+
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.itany.mvc.annotation.RequestMapping;
+import com.itany.netClass.constant.DictConstant;
+import com.itany.netClass.entity.Chapter;
+import com.itany.netClass.entity.Course;
+import com.itany.netClass.entity.CourseType;
+import com.itany.netClass.factory.ObjectFactory;
+import com.itany.netClass.service.SelectFont;
+import com.itany.netClass.util.ParameterUtil;
+
+@RequestMapping("/selectfont")
+public class SelectFontController {
+	SelectFont selectFont = (SelectFont) ObjectFactory.getObject("selectFontService");
+
+	@RequestMapping("/search")
+	public String search(HttpServletRequest request,
+			HttpServletResponse response) {
+		String searchcontext=request.getParameter("searchcontext");
+		request.getSession().setAttribute("searchcontext", searchcontext);
+		return "redirect:/selectfont/selectFirst.do";
+	}
+	
+	@RequestMapping("/selectFirst")
+	public String selectFirst(HttpServletRequest request,
+			HttpServletResponse response) {
+		List<CourseType> firstNamelists=selectFont.selectFirst();
+		for(int i=0;i<firstNamelists.size();i++){
+			System.out.println(firstNamelists.get(i));
+		}
+		request.getSession().setAttribute("firstNames", firstNamelists);
+		return "redirect:/select.do";
+	}
+	
+	@RequestMapping("/selectThird")
+	public String selectThird(HttpServletRequest request,
+			HttpServletResponse response) {
+		String firstName=request.getParameter("firstName");
+		String id=request.getParameter("id");
+		Integer courseId=Integer.parseInt(id);
+		request.getSession().setAttribute("selectedId", courseId);
+		System.out.println(firstName);
+		System.out.println(courseId);
+		List<CourseType> thirnamelists=selectFont.selectThird(firstName);
+		for(int i=0;i<thirnamelists.size();i++){
+			System.out.println(thirnamelists.get(i));
+		}
+		request.getSession().setAttribute("thirnamelists", thirnamelists);
+		return "redirect:/select.do";
+	}
+	
+	@RequestMapping("/selectAll")
+	public String selectAll(HttpServletRequest request,
+			HttpServletResponse response) {
+		String thirdId=request.getParameter("thirdId");
+		String searchContext=(String) request.getSession().getAttribute("searchcontext");
+		String search="%"+searchContext+"%";
+		List<Course> lists=selectFont.selectAll(Integer.parseInt(thirdId), search);
+		request.getSession().setAttribute("AllCourseLists", lists);
+		return "redirect:/selectfont/selectFirst.do";
+	}
+	
+	
+}

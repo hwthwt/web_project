@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="3.0" xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee 
+	http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+	<display-name>netClass</display-name>
+	
+	<filter>
+		<filter-name>backLoginFilter</filter-name>
+		<filter-class>com.itany.netClass.filters.BackLoginFilter</filter-class>
+		<init-param>
+				<param-name>only</param-name>
+				<param-value>/back_home.do,/back_userSet.do,/backcourseSet.do,/backcourseTypeSet.do,/backcommentManageSet.do,/backcommentSet.do,/backresourceSet.do</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>backLoginFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+	
+<!-- 	<error-page> -->
+<!-- 		<error-code>404</error-code> -->
+<!-- 		<location>/error404.jsp</location> -->
+<!-- 	</error-page> -->
+<!-- 	<error-page> -->
+<!-- 		<error-code>500</error-code> -->
+<!-- 		<location>/error500.jsp</location> -->
+<!-- 	</error-page> -->
+	
+	<welcome-file-list>
+		<welcome-file>index.jsp</welcome-file>
+	</welcome-file-list>
+</web-app>

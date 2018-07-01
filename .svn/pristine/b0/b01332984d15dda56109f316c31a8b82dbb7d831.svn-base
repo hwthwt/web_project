@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.itany.netClass.dao.CommentSetDao">
+	<sql id="commentColumn">
+		id,
+		context,
+		create_date,
+		user_id,
+		resource_id,
+		status
+	</sql>
+
+	<resultMap type="comment" id="commentMapper">
+		<id property="id" column="id" />
+		<result property="context" column="context" />
+		<result property="createDate" column="create_date" />
+		<result property="status" column="status" />
+		<result property="count" column="count" />
+		<association property="resource" column="resource_id"
+			javaType="resource">
+			<id property="id" column="r.id" />
+			<result property="title" column="title" />
+			<result property="path" column="path" />
+			<result property="coverImageUrl" column="cover_image_url" />
+			<result property="originalName" column="original_name" />
+			<result property="fileSize" column="file_size" />
+			<result property="fileType" column="file_type" />
+			<result property="clickCount" column="click_count" />
+			<result property="costType" column="cost_type" />
+			<result property="costNumber" column="cost_number" />
+			<result property="userId" column="r.user_id" />
+			<result property="chapterId" column="chapter_id" />
+			<result property="status" column="r.status" />
+			<result property="createDate" column="r.create_date" />
+		</association>
+		<association property="user" column="user_id" javaType="User">
+			<id property="id" column="u.id" />
+			<result property="username" column="username" />
+			<result property="nickname" column="nickname" />
+			<result property="password" column="password" />
+			<result property="role" column="role" />
+			<result property="email" column="email" />
+			<result property="loginDate" column="loginDate" />
+			<result property="createDate" column="createDate" />
+			<result property="flag" column="u.status" />
+		</association>
+	</resultMap>
+
+
+	<select id="selectAll" resultMap="commentMapper">
+		select
+		c.id,c.context,c.create_date,c.user_id,c.resource_id,c.status,
+		r.id
+		'r.id',r.title,r.path,r.cover_image_url,r.original_name,r.file_size,r.file_type,r.click_count,r.create_date
+		'r.create_date',r.cost_type,r.cost_number,
+		r.user_id
+		'r.user_id',r.chapter_id,r.status 'r.status',
+		u.id 'u.id',u.login_name
+		"username",u.nickname,u.password,u.role,u.email,u.login_date
+		"loginDate",u.create_date "createDate",u.status 'u.status',
+		p.comment_id,
+		count(p.id) 'count'
+		from
+		t_comment c
+		left join
+		t_resource r
+		on c.resource_id = r.id
+		left join
+		t_user u
+		on c.user_id = u.id
+		left
+		join
+		t_praise p
+		on c.id = p.comment_id
+		where c.resource_id = #{0}
+		and
+		c.status in (0,1)
+		group by c.id,c.context,c.create_date,c.user_id,c.resource_id,c.status,
+		r.id
+		,r.title,r.path,r.cover_image_url,r.original_name,r.file_size,r.file_type,r.click_count,r.create_date
+		,r.cost_type,r.cost_number,
+		r.user_id
+		,r.chapter_id,r.status ,
+		u.id ,u.login_name
+		,u.nickname,u.password,u.role,u.email,u.login_date
+		,u.create_date ,u.status ,
+		p.comment_id
+	</select>
+
+	<update id="update">
+		update t_comment
+		set status = #{1}
+		where id = #{0}
+	</update>
+</mapper>

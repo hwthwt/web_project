@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>课程类别管理</title>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="css/back-index.css" />
+    <script src="js/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/bootstrap.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/bootstrap-paginator.js"></script>
+    <script src="js/bootstrap-mypaginator.js"></script>
+    <script type="text/javascript" charset="utf-8">
+        $(function(){
+            $("#doAddCourseType").on("click", function() {
+                $("#courseType-id-input").hide();
+                $("#courseTypeModal").modal("show");
+            });
+            $(".courseType-btn").on("click", function() {
+                $("#courseTypeModal").modal("hide");
+            });
+
+            $(".courseType-modify").on("click", function() {
+                $("#courseType-id-input").show();
+                $("#courseTypeModal").modal("show");
+            });
+
+            //查询子类别
+            $(".course-type-detail").on("click", function() {
+                $('#frame-id', window.parent.document).attr('src', 'back_courseTypeSet.html');
+            });
+            //返回父类别列表页面
+            $("#back").on("click", function() {
+                $('#frame-id', window.parent.document).attr('src', 'back_courseTypeSet.html');
+            });
+            
+
+            //按钮的超链接设置函数
+    //      myoptions.pageUrl = function(type, page, current) {
+    //          return "${pageContext.request.contextPath }/findAll.do?pageNo="
+    //                  + page;
+    //      };
+            //分页回调函数,点击按钮事件
+            myoptions.onPageClicked = function(event, originalEvent, type, page) {
+                //ajax回调接收数据成功时再重新初始化分页按钮
+                console.log("pageNo=", page);
+            };
+
+            //分页,在bootstrap-mypaginator.js中
+            myPaginatorFun("myPages", 1, 5);
+            
+        });
+
+    </script>
+
+
+</head>
+
+<body>
+
+    <!-- 课程类别管理 -->
+    <div class="panel panel-default" id="departmentSet">
+        <div class="panel-heading">
+            <h3 class="panel-title">课程类别管理</h3>
+        </div>
+        <div class="panel-body">
+            <input type="button" value="添加课程类别" class="btn btn-primary" id="doAddCourseType" />
+            <!-- courseType父类别id,没有时,移除此按钮 -->
+            <input type="hidden" name="parent_id" value=""  />
+            <input type="button" value="返回上级列表" class="btn btn-success" id="back" style="float: right;" />
+            <br>
+            <br>
+            <div class="modal fade" tabindex="-1" id="courseTypeModal">
+                <!-- 窗口声明 -->
+                <div class="modal-dialog modal-lg">
+                    <!-- 内容声明 -->
+                    <div class="modal-content">
+                        <!-- 头部、主体、脚注 -->
+                        <div class="modal-header">
+                            <button class="close" data-dismiss="modal">&times;</button>
+                            <h4 class="modal-title">添加类别</h4>
+                        </div>
+                        <div class="modal-body text-center">
+                            <div class="row text-right" id="courseType-id-input" >
+                                <label for="courseType-id" class="col-sm-4 control-label">编号：</label>
+                                <div class="col-sm-4">
+                                    <input type="text" class="form-control" id="courseType-id" readonly="true" />
+                                </div>
+                            </div>
+                            <br>
+                            <div class="row text-right">
+                                <label for="courseType-name" class="col-sm-4 control-label">类别名称：</label>
+                                <div class="col-sm-4">
+                                    <input type="text" class="form-control" id="courseType-name" />
+                                </div>
+                            </div>
+                            <br>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-primary courseType-btn">确定</button>
+                            <button class="btn btn-primary cancel" data-dismiss="modal">取消</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="show-list">
+                <table class="table table-bordered table-hover" style='text-align: center;'>
+                    <thead>
+                        <tr class="text-danger">
+                            <th class="text-center">编号</th>
+                            <th class="text-center">名称</th>
+                            <th class="text-center">状态</th>
+                            <th class="text-center">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tb">
+                        <tr>
+                            <td>1</td>
+                            <td>Java</td>
+                            <td>启用</td>
+                            <td>
+                                <input type="button" class="btn btn-warning btn-sm courseType-modify" value="修改" />
+                                <input type="button" class="btn btn-danger btn-sm" value="禁用" />
+                                <input type="button" class="btn btn-success btn-sm course-type-detail" value="查询子类别" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>IOS</td>
+                            <td>禁用</td>
+                            <td>
+                                <input type="button" class="btn btn-warning btn-sm courseType-modify" value="修改" />
+                                <input type="button" class="btn btn-success btn-sm" value="启用" />
+                                <input type="button" class="btn btn-success btn-sm course-type-detail" value="查询子类别" />
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 分页 -->
+            <div style="text-align: center;" >
+                <ul id="myPages" ></ul>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

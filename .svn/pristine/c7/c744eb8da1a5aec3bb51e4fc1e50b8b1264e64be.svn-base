@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-module
+  type="WEB"
+  name="netClass_xjbt"
+  id="myeclipse.1521767030549"
+  context-root="/netClass"
+  j2ee-spec="6.0"
+  archive="netClass_xjbt.war">
+  <attributes>
+    <attribute name="webrootdir" value="WebRoot" />
+  </attributes>
+</project-module>
+

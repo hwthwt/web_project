@@ -1,0 +1,67 @@
+package com.itany.netClass.service.impl;
+
+import java.util.List;
+
+import com.itany.netClass.dao.CommentDao;
+import com.itany.netClass.entity.Comment;
+import com.itany.netClass.exception.TextIsEmptyException;
+import com.itany.netClass.exception.TextIsErrorException;
+import com.itany.netClass.factory.ObjectFactory;
+import com.itany.netClass.service.CommentService;
+
+public class CommentServiceImpl implements CommentService {
+	
+	private CommentDao commentDao = (CommentDao) ObjectFactory.getObject("commentDao");
+
+	@Override
+	public List<Comment> findAll() {
+		List<Comment> list = commentDao.selectAll();
+		return list;
+	}
+
+	@Override
+	public void update(String id, String status) {
+		int Id = Integer.parseInt(id);
+		int Status = Integer.parseInt(status);
+		commentDao.update(Id,Status);
+	}
+
+	@Override
+	public List<Comment> findCommentsByCourseId(List<Integer> list) {
+		try {
+			List<Comment> comments = commentDao.selectCommentsByCourseId(list);
+			return comments;
+		} catch (NumberFormatException e) {
+			throw e;
+		}
+	}
+
+	@Override
+	public List<Comment> findCommentsByResourceId(String resourceId) {
+		try {
+			int Id = Integer.parseInt(resourceId);
+			List<Comment> comments = commentDao.selectCommentsByResourceId(Id);
+			return comments;
+		} catch (NumberFormatException e) {
+			throw e;
+		}
+	}
+
+	@Override
+	public void add(String text, String resourceId, Integer uid) throws TextIsEmptyException, TextIsErrorException {
+		try {
+			int Id = Integer.parseInt(resourceId);
+			if(text==null||text==""){
+				throw new TextIsEmptyException("评论不能为空");
+			}
+			String reg = "[0-9a-zA-Z\u4e00-\u9fa5.,。?“”.,?]+";
+			if(!text.matches(reg)){
+				throw new TextIsErrorException("评论格式不正确");
+			}
+			commentDao.add(text,Id,uid);
+		} catch (NumberFormatException e) {
+			e.printStackTrace();
+		}
+	}
+
+}

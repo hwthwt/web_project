@@ -1,0 +1,21 @@
+package com.itany.netClass.service;
+
+import java.util.List;
+
+import com.itany.netClass.entity.Comment;
+import com.itany.netClass.exception.TextIsEmptyException;
+import com.itany.netClass.exception.TextIsErrorException;
+
+public interface CommentService {
+
+	List<Comment> findAll();
+
+	void update(String id, String status);
+
+	List<Comment> findCommentsByCourseId(List<Integer> list);
+
+	List<Comment> findCommentsByResourceId(String resourceId);
+
+	void add(String text, String resourceId, Integer uid) throws TextIsEmptyException,TextIsErrorException, Exception;
+
+}

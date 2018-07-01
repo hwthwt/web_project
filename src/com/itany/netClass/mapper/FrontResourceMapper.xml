@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.itany.netClass.dao.ChapterListDao">
+	<resultMap type="chapter" id="chapterMapper">
+	<id property="id" column="id"/>
+	<result property="title" column="title" />
+	<result property="info" column="title" />
+	<association property="course" column="s.id" javaType="courseSet">
+		<id property="id" column="s.id"/>
+		<result property="course_name" column="course_name" />
+		<result property="click_number" column="click_number" />
+	</association>
+	<association property="resource" column="'r.id'" javaType="resource">
+		<id property="id" column="r.id"/>
+		<result property="title" column="r.title" />
+		<result property="path" column="path" />
+		<result property="fileType" column="file_type" />
+		<result property="costType" column="cost_type" />
+		<result property="costNumber" column="cost_number" />
+		<result property="userId" column="user_id" />
+		<result property="chapterId" column="chapter_id" />
+	</association>
+	</resultMap>
+	<select id="selectAllByCourseId" resultMap="chapterMapper" >
+		select 
+			c.id ,c.title , c.info ,c.course_id ,
+			s.id 's.id', s.course_name ,s.click_number ,
+			r.id 'r.id', r.title 'r.title',r.path,r.file_type,r.cost_type,r.cost_number,r.user_id,r.chapter_id
+		from t_chapter c
+			inner join t_course s
+			on c.course_id = s.id
+			inner join t_resource r
+			on r.chapter_id = c.id
+			where 
+			r.status = 0
+			and c.status = 0
+			and s.status = 0
+			and c.course_id = #{0}
+	</select>
+	
+	
+	<select id="findCourses"  resultType="Course">
+				select * from t_course 
+				order by click_number desc 
+				limit 3
+		</select>	
+		
+		
+		
+</mapper>

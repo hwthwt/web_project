@@ -1,0 +1,13 @@
+package com.itany.netClass.service;
+
+import java.util.List;
+
+import com.itany.netClass.entity.Comment;
+
+public interface CommentSetService {
+
+	List<Comment> findAll(String ReId);
+
+	void update(String id, String status);
+
+}

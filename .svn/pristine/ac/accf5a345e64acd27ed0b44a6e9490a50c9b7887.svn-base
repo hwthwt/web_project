@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.itany.netClass.dao.SelectFontDao">
+	<sql id="CourseTypeColum">
+			id,
+			type_name,
+			parent_id,
+			status
+	</sql>
+    <resultMap type="CourseType" id="CourseType22">
+		<id property="id" column="id" />
+		<result property="typeName" column="type_name" />
+		<result property="parentId" column="parent_id" />
+		<result property="status" column="status" />
+	</resultMap>
+	
+		<select id="selectFirst" resultMap="CourseType22">
+				select  <include refid="CourseTypeColum"></include>
+				from t_course_type 
+				where 
+				parent_id is NULL
+		</select>
+		
+	  <select id="selectThird" resultMap="CourseType22">
+				select p3.id id,p3.type_name type_name,
+				p3.parent_id parent_id,p3.status status 
+				from t_course_type 
+				p1 left join t_course_type p2 on p2.parent_id = p1.id 
+				left join t_course_type p3 on p3.parent_id = p2.id 
+				where p1.parent_id is null 
+				and p1.type_name=#{0};
+		</select> 
+		
+		<select id="selectAll"  resultType="Course">
+				select * from t_course 
+				where course_type_id=#{0}
+				and course_name like #{1} escape '/'
+				order by create_date desc
+		</select>
+</mapper>

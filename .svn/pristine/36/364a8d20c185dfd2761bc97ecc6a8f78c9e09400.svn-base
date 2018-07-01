@@ -1,0 +1,127 @@
+package com.itany.netClass.service.impl;
+
+import java.util.List;
+
+import com.itany.netClass.dao.CourseSetDao;
+import com.itany.netClass.dao.UserDao;
+import com.itany.netClass.entity.CourseSet;
+import com.itany.netClass.exception.DataParseException;
+import com.itany.netClass.exception.EmptyChooseException;
+import com.itany.netClass.exception.NameIsEmptyException;
+import com.itany.netClass.exception.NameIsUsedException;
+import com.itany.netClass.exception.infoIsEmptyException;
+import com.itany.netClass.factory.ObjectFactory;
+import com.itany.netClass.service.CourseSetService;
+import com.itany.netClass.util.ParameterUtil;
+
+public class CourseSetServiceImpl implements CourseSetService {
+	
+	private CourseSetDao courseSetDao = (CourseSetDao) ObjectFactory.getObject("courseSetDao");
+
+	@Override
+	public List<CourseSet> findAll() {
+		List<CourseSet> courses = courseSetDao.selectAll();
+		return courses;
+	}
+
+	@Override
+	public void updateStatusById(String id, String status) throws DataParseException {
+		int Id = Integer.parseInt(id);
+		int Status = Integer.parseInt(status);
+		
+		courseSetDao.updateStatusById(Id,Status);
+	}
+
+	@Override
+	public boolean check(String id, String name, String info, String author,
+			String recommendationGrade, String courseTypeId) throws NameIsUsedException,EmptyChooseException,infoIsEmptyException,NameIsEmptyException,Exception {
+		if(ParameterUtil.isNull(id)){
+			if(ParameterUtil.isNull(name)){
+				throw new NameIsEmptyException("名字不能为空");
+			}
+			if(ParameterUtil.isNull(info)){
+				throw new infoIsEmptyException("信息不能为空");
+			}
+			if(ParameterUtil.isNull(author)){
+				throw new NameIsEmptyException("作者名字不能为空");
+			}
+				try {
+					int grade = Integer.parseInt(recommendationGrade);
+					int type = Integer.parseInt(courseTypeId);
+					if(grade==-1){
+						throw new EmptyChooseException("推荐等级必须选择");
+					}
+					if(type==-1){
+						throw new EmptyChooseException("课程类别必须选择");
+					}
+					List<CourseSet> courses = courseSetDao.selectByNameAndAuthor(name,author);
+					if(!courses.isEmpty()){
+						throw new NameIsUsedException("该名字已有作者使用");
+					}
+					return true;
+				} catch (Exception e) {
+					throw e;
+				}
+		}
+		if(ParameterUtil.isNull(name)){
+			throw new NameIsEmptyException("名字不能为空");
+		}
+		if(ParameterUtil.isNull(info)){
+			throw new infoIsEmptyException("信息不能为空");
+		}
+		if(ParameterUtil.isNull(author)){
+			throw new NameIsEmptyException("作者名字不能为空");
+		}
+			try {
+				int Id = Integer.parseInt(id);
+				int grade = Integer.parseInt(recommendationGrade);
+				int type = Integer.parseInt(courseTypeId);
+				if(grade==-1){
+					throw new EmptyChooseException("推荐等级必须选择");
+				}
+				if(type==-1){
+					throw new EmptyChooseException("课程类别必须选择");
+				}
+				List<CourseSet> courses = courseSetDao.selectByIdAndAuthor(Id,author);
+				if(courses.isEmpty()){
+					List<CourseSet> courses1 = courseSetDao.selectByNameAndAuthor(name,author);
+					if(!courses1.isEmpty()){
+						throw new NameIsUsedException("该名字已有作者使用");
+					}
+				}
+				List<CourseSet> courses2 = courseSetDao.selectByName(name);
+				if(!courses2.isEmpty()){
+					if(courses2.get(0).getId()!=Id){
+						throw new NameIsUsedException("该名字已有作者使用");
+					}
+				}
+				return true;
+			} catch (Exception e) {
+				throw e;
+			}
+	}
+
+	@Override
+	public void insert(String name, String info, String author,
+			String recommendationGrade, String courseTypeId, String imagePath) {
+		int grade = Integer.parseInt(recommendationGrade);
+		int type = Integer.parseInt(courseTypeId);
+		courseSetDao.insert(name,info,author,imagePath,grade,type);
+	}
+
+	@Override
+	public CourseSet findById(String id) {
+		CourseSet c = courseSetDao.selectById(Integer.parseInt(id));
+		return c;
+	}
+
+	@Override
+	public void update(String id, String name, String info, String author,
+			String recommendationGrade, String courseTypeId, String imagePath) {
+		int Id = Integer.parseInt(id);
+		int grade = Integer.parseInt(recommendationGrade);
+		int type = Integer.parseInt(courseTypeId);
+		courseSetDao.update(Id, name, info, author, grade, type, imagePath);
+	}
+
+}

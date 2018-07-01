@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.itany.netClass.dao.CourseTypeSetDao">
+	<resultMap type="CourseType" id="courseTypeMap">
+		<id property="id" column="p1Id" />
+		<result property="typeName" column="p1Name" />
+		<result property="parentId" column="p1ParentId" />
+		<result property="status" column="p1Status" />
+		<collection property="children" javaType="CourseType"
+			column="p1ParentId">
+			<id property="id" column="p2Id" />
+			<result property="typeName" column="p2Name" />
+			<result property="parentId" column="p2ParentId" />
+			<result property="status" column="p2Status" />
+			<collection property="children" javaType="CourseType"
+				column="p2ParentId">
+				<id property="id" column="p3Id" />
+				<result property="typeName" column="p3Name" />
+				<result property="parentId" column="p3ParentId" />
+				<result property="status" column="p3Status" />
+			</collection>
+		</collection>
+	</resultMap>
+
+	<select id="selectAll" resultMap="courseTypeMap">
+		select t.id 'p1Id',t.type_name
+		'p1Name',t.status 'p1Status',t.parent_id 'p1ParentId',p2.id
+		'p2Id',p2.type_name 'p2Name',p2.status 'p2Status',p2.parent_id
+		'p2ParentId',p3.id 'p3Id',p3.type_name 'p3Name',p3.status
+		'p3Status',p3.parent_id 'p3ParentId' from t_course_type t left join
+		t_course_type p2 on t.id = p2.parent_id left join t_course_type p3 on
+		p2.id = p3.parent_id where t.parent_id is null group by t.id
+	</select>
+	
+	<select id="selectNotNull" resultMap="courseTypeMap">
+		select  t.id 'p1Id',t.type_name
+		'p1Name',t.status 'p1Status',t.parent_id 'p1ParentId',p2.id
+		'p2Id',p2.type_name 'p2Name',p2.status 'p2Status',p2.parent_id
+		'p2ParentId',p3.id 'p3Id',p3.type_name 'p3Name',p3.status
+		'p3Status',p3.parent_id 'p3ParentId' from t_course_type t left join
+		t_course_type p2 on t.id = p2.parent_id left join t_course_type p3 on
+		p2.id = p3.parent_id  where p3.parent_id is not null
+	</select>
+	
+	
+	<select id="selectById" parameterType="int" resultMap="courseTypeMap">
+	select t.id 'p1Id',t.type_name
+		'p1Name',t.status 'p1Status',t.parent_id 'p1ParentId',p2.id
+		'p2Id',p2.type_name 'p2Name',p2.status 'p2Status',p2.parent_id
+		'p2ParentId',p3.id 'p3Id',p3.type_name 'p3Name',p3.status
+		'p3Status',p3.parent_id 'p3ParentId' from t_course_type t left join
+		t_course_type p2 on t.id = p2.parent_id left join t_course_type p3 on
+		p2.id = p3.parent_id where t.id = #{id}
+	</select>
+	
+	<select id="selectBytypeName"  resultMap="courseTypeMap">
+	select t.id 'p1Id',t.type_name
+		'p1Name',t.status 'p1Status',t.parent_id 'p1ParentId',p2.id
+		'p2Id',p2.type_name 'p2Name',p2.status 'p2Status',p2.parent_id
+		'p2ParentId',p3.id 'p3Id',p3.type_name 'p3Name',p3.status
+		'p3Status',p3.parent_id 'p3ParentId' from t_course_type t left join
+		t_course_type p2 on t.id = p2.parent_id left join t_course_type p3 on
+		p2.id = p3.parent_id where t.type_name = #{0} and t.id != #{1}
+	</select>
+	<update id="updateType" >
+			update t_course_type set type_name = #{0} where id = #{1}
+	</update>
+	<update id="updateStatus" >
+			update t_course_type set status = #{0} where id = #{1}
+	</update>
+	<update id="updateSonStatus" >
+			update t_course_type set status = #{0} where parent_id = #{1}
+	</update>
+	<select id="selectByName"  resultMap="courseTypeMap">
+	select t.id 'p1Id',t.type_name
+		'p1Name',t.status 'p1Status',t.parent_id 'p1ParentId',p2.id
+		'p2Id',p2.type_name 'p2Name',p2.status 'p2Status',p2.parent_id
+		'p2ParentId',p3.id 'p3Id',p3.type_name 'p3Name',p3.status
+		'p3Status',p3.parent_id 'p3ParentId' from t_course_type t left join
+		t_course_type p2 on t.id = p2.parent_id left join t_course_type p3 on
+		p2.id = p3.parent_id where t.type_name = #{typename} 
+	</select>
+	<insert id="insertType">
+	insert into t_course_type
+	<choose>
+		<when test="#{1}!=null &amp;&amp; #{1}!=''">
+		(type_name,status,parent_id) values (#{0},0,#{1})
+		</when>
+		<otherwise>
+			(type_name,status,parent_id) values (#{0},0,null)
+		</otherwise>
+	</choose>
+	</insert>
+	
+	<select id="selectfindSon"  resultMap="courseTypeMap">
+	select t.id 'p1Id',t.type_name
+		'p1Name',t.status 'p1Status',t.parent_id 'p1ParentId',p2.id
+		'p2Id',p2.type_name 'p2Name',p2.status 'p2Status',p2.parent_id
+		'p2ParentId',p3.id 'p3Id',p3.type_name 'p3Name',p3.status
+		'p3Status',p3.parent_id 'p3ParentId' from t_course_type t left join
+		t_course_type p2 on t.id = p2.parent_id left join t_course_type p3 on
+		p2.id = p3.parent_id where t.parent_id = #{parentid}  group by t.id
+	</select>
+	
+	
+	<select id="selectfindFather"  resultMap="courseTypeMap">
+	select t.id 'p1Id',t.type_name
+		'p1Name',t.status 'p1Status',t.parent_id 'p1ParentId',p2.id
+		'p2Id',p2.type_name 'p2Name',p2.status 'p2Status',p2.parent_id
+		'p2ParentId',p3.id 'p3Id',p3.type_name 'p3Name',p3.status
+		'p3Status',p3.parent_id 'p3ParentId' from t_course_type t left join
+		t_course_type p2 on t.id = p2.parent_id left join t_course_type p3 on
+		p2.id = p3.parent_id where p3.parent_id = #{parentid}  group by t.id
+	</select>
+	
+	
+</mapper>

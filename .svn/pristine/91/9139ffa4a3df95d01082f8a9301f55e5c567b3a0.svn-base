@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.itany.netClass.dao.MycourseDao">
+	<resultMap type="userresource" id="userresourceMap">
+		<id property="id" column="id" />
+		<result property="updateDate" column="update_date" />
+		<result property="updateDateYear" column="updatedateyear" />
+		<result property="updateDateDay" column="updatedateday" />
+		<association property="user" column="user_id" javaType="user">
+			<id property="id" column="u.id" />
+		</association>
+		<association property="resource" column="resource_id"
+			javaType="resource">
+			<id property="id" column="r.id" />
+			<result property="title" column="title" />
+			<result property="path" column="path" />
+			<result property="fileType" column="file_type" />
+			<result property="coverImageUrl" column="cover_image_url" />
+			<result property="status" column="r.status" />
+		</association>
+	</resultMap>
+	<resultMap type="resource" id="resourceMap">
+		<id property="id" column="id" />
+		<result property="title" column="title" />
+		<result property="path" column="path" />
+		<result property="fileSize" column="file_size" />
+		<result property="fileType" column="file_type" />
+		<result property="costType" column="cost_type" />
+		<result property="costNumber" column="cost_number" />
+		<result property="createDateYear" column="createdateyear" />
+		<result property="createDateDay" column="createdateday" />
+		<association property="user" column="user_id" javaType="user">
+			<id property="id" column="u.id" />
+			<result property="nickname" column="nickname" />
+		</association>
+		<!-- <association property="chapter" column="chapter_id" javaType="chapter"> 
+			<id property="id" column="t.id" /> <result property="typeName" column="type_name" 
+			/> <result property="parentId" column="parent_id" /> <result property="status" 
+			column="t.status" /> </association> -->
+	</resultMap>
+	<select id="selectByUserId" resultMap="userresourceMap">
+		select
+		ur.id,ur.update_date,date_format(ur.update_date, '%Y')
+		'updatedateyear',date_format(ur.update_date, '%m月%d日
+		%H:%i:%s')
+		'updatedateday',r.title,r.path,r.cover_image_url,r.file_type,r.status
+		'r.status'
+		from
+		t_user_resource ur
+		left join t_resource r
+		on
+		ur.resource_id = r.id
+		left
+		join t_user u
+		on ur.user_id =u.id
+		where
+		ur.user_id = #{id} order by
+		ur.id desc;
+	</select>
+
+	<select id="selectAllResource" resultMap="resourceMap">
+		select
+		r.id,r.title,r.path,r.file_size,r.file_type,r.cost_type,r.cost_number,
+		date_format(r.create_date, '%Y')
+		'createdateyear',date_format(r.create_date, '%m月%d日
+		%H:%i:%s')
+		'createdateday',
+		u.id
+		'u.id',u.nickname
+		from t_resource r
+		left join t_user
+		u
+		on r.user_id = u.id
+		where u.id = #{id} and r.status = 0 order by
+		r.id
+		desc;
+	</select>
+
+
+	<update id="updateStatus">
+		update t_resource
+		set
+		status = 1
+		where id = #{id}
+	</update>
+
+	<insert id="insertResource" parameterType="resource">
+		insert into t_resource
+		(title,path,original_name,file_size,file_type,create_date,cost_type,cost_number,user_id,status)
+		values (#{title},#{path},#{originalName},#{fileSize},#{fileType},#{createDateD},#{costType},#{costNumber},#{userId},#{status})
+	</insert>
+
+	<update id="updateResource"  parameterType="resource">
+		update t_resource
+		set 
+		title = #{title},
+		path = #{path},
+		original_name = #{originalName},
+		file_size = #{fileSize},
+		file_type = #{fileType},
+		create_date = #{createDateD},
+		cost_type = #{costType},
+		cost_number = #{costNumber},
+		user_id = #{userID},
+		status = #{status}
+		where id = #{id}
+	</update>
+	
+	<select id="selectByTitle" resultMap="resourceMap">
+		select
+		r.id,r.title,r.path,r.file_size,r.file_type,r.cost_type,r.cost_number,
+		date_format(r.create_date, '%Y')
+		'createdateyear',date_format(r.create_date, '%m月%d日
+		%H:%i:%s')
+		'createdateday',
+		u.id
+		'u.id',u.nickname
+		from t_resource r
+		left join t_user
+		u
+		on r.user_id = u.id
+		where r.title = #{title};
+	</select>
+	
+	<select id="selectByTitleAndId" resultMap="resourceMap">
+		select
+		r.id,r.title,r.path,r.file_size,r.file_type,r.cost_type,r.cost_number,
+		date_format(r.create_date, '%Y')
+		'createdateyear',date_format(r.create_date, '%m月%d日
+		%H:%i:%s')
+		'createdateday',
+		u.id
+		'u.id',u.nickname
+		from t_resource r
+		left join t_user
+		u
+		on r.user_id = u.id
+		where r.title = #{0} and r.id != #{1};
+	</select>
+
+
+</mapper>

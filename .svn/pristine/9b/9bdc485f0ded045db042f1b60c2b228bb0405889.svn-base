@@ -1,0 +1,30 @@
+package com.itany.netClass.service.impl;
+
+import java.util.List;
+
+import com.itany.netClass.dao.CommentDao;
+import com.itany.netClass.dao.CommentSetDao;
+import com.itany.netClass.entity.Comment;
+import com.itany.netClass.factory.ObjectFactory;
+import com.itany.netClass.service.CommentService;
+import com.itany.netClass.service.CommentSetService;
+
+public class CommentSetServiceImpl implements CommentSetService {
+	
+	private CommentSetDao commentSetDao = (CommentSetDao) ObjectFactory.getObject("commentSetDao");
+
+	@Override
+	public List<Comment> findAll(String ReId) {
+		int id = Integer.parseInt(ReId);
+		List<Comment> list = commentSetDao.selectAll(id);
+		return list;
+	}
+
+	@Override
+	public void update(String id, String status) {
+		int Id = Integer.parseInt(id);
+		int Status = Integer.parseInt(status);
+		commentSetDao.update(Id,Status);
+	}
+
+}

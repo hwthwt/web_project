@@ -1,0 +1,29 @@
+package com.itany.netClass.dao;
+
+import java.util.List;
+
+import com.itany.netClass.entity.CourseSet;
+
+public interface CourseSetDao {
+
+	List<CourseSet> selectAll();
+
+	void updateStatusById(int id, int status);
+
+	List<CourseSet> selectByNameAndAuthor(String name, String author);
+
+	List<CourseSet> selectByIdAndAuthor(int id, String author);
+
+	List<CourseSet> selectByName(String name);
+
+	void insert(String name, String info, String author, String imagePath,
+			int grade, int type);
+
+	CourseSet selectById(int parseInt);
+
+	void update(int id, String name, String info, String author, int grade,
+			int type, String imagePath);
+
+	List<CourseSet> selectSearch(CourseSet c);
+
+}
